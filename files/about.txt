@@ -1,0 +1,12 @@
+--- SLOP: ABOUT ---
+
+the Sample Limning Operator Package was developed by Astro, and the original base idea of such a project was posted online some time before by Nyn Famitory.
+
+The program contains different modules (operators) with one main goal: recreate an input sample from tiny fractures of program's own sample libraries called 'bitepacks'.
+
+MatchEngine is the main Operator: it takes in a .wav file, asks about limning parameters and outputs another .wav recreated from bites.
+
+PackManager is a tool for enabling/disabling packages, editing settings, registering new packages, and so on. (registering done automatically by BitePacker)
+
+BitePacker is an Operator for creating your own bitepacks. It can process a single file, multiple files entered one by one or an entire directory of files into a bitepack. A bitepack is a special folder which contains prepared wavesamples named in a standard way, and a special file 'sampledata.fft' with bitepack analysis. It uses Operators SampleSlicer and FFTAnalyzer.
+

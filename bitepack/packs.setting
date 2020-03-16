@@ -1,0 +1,21 @@
+{
+    "packsAvailable": [
+        {
+            "path": "./bitepack/contra",
+            "sampleCount": 192
+        },
+        {
+            "path": "./bitepack/NES",
+            "sampleCount": 192
+        },
+        {
+            "path": "./bitepack/\u044164",
+            "sampleCount": 192
+        }
+    ],
+    "packsActive": [
+        "contra",
+        "NES",
+        "\u044164"
+    ]
+}
