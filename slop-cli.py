@@ -33,6 +33,7 @@ from inc import packmanager
 
 from os.path import exists, isfile, join, dirname, basename
 import os
+from sys import platform
 
 
 #--------------------------------------------------------------------------------------------------------
@@ -71,7 +72,11 @@ def postfixFileName(name, postfix):
 #--------------------------------------------------------------------------------------------------------
 # clear the console screen
 def consoleClear():
-	os.system('clear')
+	if platform == "windows":
+		os.system('cls')
+	else:
+		os.system('clear')
+
 
 
 #--------------------------------------------------------------------------------------------------------
