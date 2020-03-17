@@ -4,7 +4,7 @@
                 #========              V1.0    16 MAR 2020                ========#
 
 '''
-MAIN FUNCTION: 
+MAIN FUNCTION: matchSample()
 MAIN PURPOSE:  build a limned version of an input sample out of available packs
 NOTES:         just a small additional ware. Might include it as a small utility in the CLI or GUI ver.
 '''
@@ -17,6 +17,7 @@ import pydub
 from pydub import AudioSegment
 from os.path import isfile, join
 from math import ceil
+from random import randrange
 
 try:
 	from inc import fftanalyzer
@@ -29,9 +30,9 @@ except:
 #--------------------------------------------------------------------------------------------------------
 # make a limned version of inFile and render it to outDirectory under name outName.wav
 
-def createLimnedVersion(inFile, outDir, outName, bitePackList, chunkSize=4, fade=False, ):
+def createLimnedVersion(inFile, outDir, outName, bitePackList, chunkSize=4, fade=False, normalize=False, randomize=False ):
 	sampleFFTData = getSampleFFT(inFile)
-	newSample = matchSample(sampleFFTData, bitePackList, chunkSize, fade)
+	newSample = matchSample(sampleFFTData, bitePackList, chunkSize, fade, normalize, randomize)
 	outPath = join(outDir, outName)
 	file_handle = newSample.export(outPath, format="wav")
 
@@ -80,10 +81,13 @@ def getBiteChunk(sampleNum, fftList, size):
 
 #--------------------------------------------------------------------------------------------------------
 
-def matchSample(sampleFFTData, bitePackList, chunkSize=4, fade=False, blockSize=2, dataFileName="sampledata.fft"):
+def matchSample(sampleFFTData, bitePackList, givenChunkSize=4, fade=False, norm=False, rand=False, blockSize=2, dataFileName="sampledata.fft"):
+
+	# had to move the original value into a variable, more or less the CLI calls it 'chunk length', so...
+	# chunk size is value used DURING APPENDAGE, chunk length is the original value passed on when called
+	chunkSize = givenChunkSize
 
  	# fade-related values calculation
-
 	fadeInChunks = ceil(chunkSize/4)
 
 	if (fade):
@@ -135,9 +139,19 @@ def matchSample(sampleFFTData, bitePackList, chunkSize=4, fade=False, blockSize=
 		if ((fade) and (count>0)):
 			cfade = blockSize*fadeInChunks
 
-		outSample = outSample.append(appendSample[:sampleSize], crossfade=cfade)
+		appendSample = appendSample[:sampleSize]
+
+		if (norm):
+			appendSample = normalizeAudioSegment(appendSample)
+
+		outSample = outSample.append(appendSample, crossfade=cfade)
 
 		count += chunkSize
+
+		# post-appendage random chunk and fade length recalculation if needed:
+		if (rand):
+			chunkSize = givenChunkSize + randrange(-rand, +rand)
+			fadeInChunks = ceil(givenChunkSize/4)
 
 	return outSample
 
@@ -171,6 +185,15 @@ def compareChunks(sampleChunk, biteChunk):
 	for num, val in enumerate(sampleChunk):
 		overallDistance += getAmpListDistance(sampleChunk[num], biteChunk[num])
 	return overallDistance
+
+
+#--------------------------------------------------------------------------------------------------------
+# return a volume-normalized copy of the sample
+
+def normalizeAudioSegment(aseg):
+	return aseg.apply_gain(-aseg.max_dBFS)
+
+
 
 
 #--------------------------------------------------------------------------------------------------------

@@ -6,7 +6,19 @@
 '''
 MAIN FUNCTION: - 
 MAIN PURPOSE:  CLI version of SLOP
-NOTES:         -
+NOTES:         .
+               .
+               made by: Astro (aka Astro The Fox, Elysian Tunes, SYNTHFOX, etc..)
+               original algorythm envision: Nyn Famitory
+               special thanks to people who made libraries listed below there in [# imports]
+               .
+               visit:
+                   https://elysiantunes.bandcamp.com      ~ my music
+                   https://sfcs.neocities.org             ~ my DIY synthesizers
+                   https://astrossoundhell.neocities.org  ~ my personal webpage
+                   https://github.com/kouyouelysian       ~ my github profile
+				   https://famitory.bandcamp.com/         ~ Famitory's music
+			   .
 '''
 
 #--------------------------------------------------------------------------------------------------------
@@ -63,6 +75,13 @@ def consoleClear():
 
 
 #--------------------------------------------------------------------------------------------------------
+# debug check a var
+def check(arg):
+	print(arg)
+	input("\nany key to run next..")
+
+
+#--------------------------------------------------------------------------------------------------------
 # local vars
 
 defaultBanner = "welcome to SLOP (Sample Limning Operator Package)"
@@ -72,7 +91,8 @@ badMessage = ""
 defaultPackSettingsLocation = "./bitepack/packs.setting"
 packPlaces = ["./bitepack/"]
 
-
+aboutLocation = "./files/about.txt"
+changelogLocation = "./files/changelog.txt"
 
 #--------------------------------------------------------------------------------------------------------
 # pre-runtime stuff
@@ -102,10 +122,14 @@ while (1):
 		consoleBanner = defaultBanner
 
 	# print opts
-	print("\nM: run MatchEngine")
-	print("P: run PackManager")
-	print("B: run BitePacker")
-	print("A. about SLOP")
+	print("\n---- RUN:")
+	print("M: MatchEngine")
+	print("P: PackManager")
+	print("B: BitePacker")
+	print("\n---- READ:")
+	print("A: about SLOP")
+	print("C: changelog")
+	print("\n---- OTHER:")
 	print("X: exit software")
 	opt = checkMenuOption(input("\n#: "))
 
@@ -170,18 +194,34 @@ while (1):
 				destDir = join(destDir, packName)
 
 				doubleSampling = checkMenuOption(input("\nUse double density sampling? (Y/N)\n\n#: "))
-				if (not sourceList==False):
-					if (doubleSampling == "Y"):
-						d = True
-					elif (doubleSampling == "N"):
-						d = False
-					else:
-						consoleBanner = "ERROR: bad Y/N choice!"
-						badMessage = True
-						continue
+				if (doubleSampling == "Y"):
+					d = True
+				elif (doubleSampling == "N"):
+					d = False
+				else:
+					consoleBanner = "ERROR: bad Y/N choice!"
+					badMessage = True
+					continue
 
-				bitepacker.packList(sourceList, destDir, d)
-				packSettings = packmanager.register(destDir, packSettings)
+				bitesLimit = False
+				limitBitesPerFile = checkMenuOption(input("\nLimit bites per sample? (Y/N)\n\n#: "))
+				if (limitBitesPerFile == "Y"):
+					bitesLimit = input("\nHow many bites per one sample maximum?\n\n#: ")
+					try:
+						bitesLimit = int(bitesLimit)
+					except Exception as e:
+						badMessage = True
+						consoleBanner = "ERROR: not an integer number provided!"
+						continue
+				elif (limitBitesPerFile != "N"):
+					consoleBanner = "ERROR: bad Y/N choice!"
+					badMessage = True
+					continue
+
+				if (not sourceList==False):
+					check(bitesLimit)
+					bitepacker.packList(sourceList, destDir, d, bitesLimit)
+					packSettings = packmanager.register(destDir, packSettings)
 
 			else:
 				consoleBanner = "ERROR: bad option"
@@ -213,31 +253,70 @@ while (1):
 			outName = input("\nName of the output file without extension? (blank to use autonaming)\n#: ")
 			if (outName == ""):
 				outName = postfixFileName(inFile, "-limned")
-
-			fade = True
-			fadeOption = checkMenuOption(input("\nEnable microfading? (Y/N)\n\n#: "))
-			if (fadeOption == "N"):
-				fade = False
-			elif (fadeOption != "Y"):
-				badMessage = True
-				consoleBanner = "ERROR: bad (Y/N) choice"
-				continue
-
-			chunkSize = 8
-			chunkOption = input("\nChunk length, integer from 2 to 64 (blank for default 8)\n\n#: ")
-			try:
-				chunkSize = int(chunkOption)
-			except Exception as e:
-				badMessage = True
-				consoleBanner = "ERROR: non-integer value provided!"
-				continue
 			else:
-				if ((chunkSize < 2) or (chunkSize > 64)):
+				outName = join(outDir, (outName + ".wav"))
+
+
+			# extended parameters
+			chunkSize = 8
+			fade = True
+			normalize = False
+			randomize = False
+
+
+
+			extOption = checkMenuOption(input("\nEnter extended parameters? (Y/N)\n\n#: "))
+			if (extOption == "Y"):
+				# entering parameters here
+				chunkOption = input("\nChunk length, integer from 2 to 64 (blank for default 8)\n\n#: ")
+				try:
+					chunkSize = int(chunkOption)
+				except Exception as e:
 					badMessage = True
-					consoleBanner = "ERROR: chunk size exceeds borders!"
+					consoleBanner = "ERROR: non-integer value provided!"
+					continue
+				else:
+					if ((chunkSize < 2) or (chunkSize > 64)):
+						badMessage = True
+						consoleBanner = "ERROR: chunk size exceeds borders!"
+						continue
+
+				tempOpt = checkMenuOption(input("\nEnable microfading? (Y/N)\n\n#: "))
+				if (tempOpt == "N"):
+					fade = False
+				elif (tempOpt != "Y"):
+					badMessage = True
+					consoleBanner = "ERROR: bad (Y/N) choice"
 					continue
 
-			matchengine.createLimnedVersion(inFile, outDir, outName, packPaths, chunkSize, fade)
+				tempOpt = checkMenuOption(input("\nEnable chunk gain compensation? (Y/N)\n\n#: "))
+				if (tempOpt == "Y"):
+					normalize = True
+				elif (tempOpt != "N"):
+					badMessage = True
+					consoleBanner = "ERROR: bad (Y/N) choice"
+					continue
+
+				tempOpt = checkMenuOption(input("\nEnable chunk length randomization? (Y/N)\n\n#: "))
+				if (tempOpt == "Y"):
+					maxDev = min(chunkSize, (64-chunkSize))-1
+					print("\nEnter a value of possible positive AND negative deviation from entered chunk length")
+					randomize = input("\nThe highest deviation available right now is: %r" % (maxDev))
+					try:
+						randomize = int(randomize)
+					except Exception as e:
+						badMessage = True
+						consoleBanner = "ERROR: not an integer was provided!"
+						continue
+					else:
+						if (randomize == 0):
+							randomize = False
+				elif (tempOpt != "N"):
+					badMessage = True
+					consoleBanner = "ERROR: bad (Y/N) choice"
+					continue
+
+			matchengine.createLimnedVersion(inFile, outDir, outName, packPaths, chunkSize, fade, normalize, randomize)
 
 		# run packmanager
 		elif (opt == "P"):
@@ -320,7 +399,24 @@ while (1):
 		# show about
 		elif (opt == "A"):
 			consoleClear()
-			fHandle = open("./files/about.txt", "r")
+			if (not exists(aboutLocation)):
+				badMessage = True
+				consoleBanner = "ERROR: files are corrupt or missing! Please redownload SLOP!"
+			fHandle = open(aboutLocation, "r")
+			continue
+			displayString = fHandle.read()
+			fHandle.close()
+			print(displayString)
+			input("\n\npress any key to go back...")
+
+		# show changelog
+		elif (opt == "C"):
+			consoleClear()
+			if (not exists(changelogLocation)):
+				badMessage = True
+				consoleBanner = "ERROR: files are corrupt or missing! Please redownload SLOP!"
+				continue
+			fHandle = open(changelogLocation, "r")
 			displayString = fHandle.read()
 			fHandle.close()
 			print(displayString)

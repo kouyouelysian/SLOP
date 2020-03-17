@@ -73,18 +73,24 @@ def renameSlices(directory, prefix="sample", fileFormat="wav"):
 #--------------------------------------------------------------------------------------------------------
 # takes in a list of paths to wavesamples, slices them to some directory.
 
-def sliceSampleList(listToSlice, destDir, double=True):
+def sliceSampleList(listToSlice, destDir, double=True, maxSlices=False):
+
+	global maxBites
+	if (not maxSlices):
+		maxSlices = maxBites
+
+	maxBitesPerSample = min(maxBites, maxSlices)
+
 	count = 0
 	totalBites = 0
 
-	global maxBites
+
 	for sample in listToSlice:
+
 		if (totalBites == maxBites): # if we already made maxBites bites - exit to renaming them
 			break
-		elif (totalBites == 0):
-			totalBites += sampleslicer.processSample(sample, destDir, double, (str(count) + "_"),  maxBites)
 		else:
-			totalBites += sampleslicer.processSample(sample, destDir, double, (str(count) + "_"),  (maxBites - totalBites))
+			totalBites += sampleslicer.processSample(sample, destDir, double, (str(count) + "_"),  min((maxBites - totalBites), maxBitesPerSample))
 		count += 1
 	renameSlices(destDir)
 	return
@@ -93,9 +99,9 @@ def sliceSampleList(listToSlice, destDir, double=True):
 #--------------------------------------------------------------------------------------------------------
 # takes in a directory name, slices them to some directory.
 
-def sliceSampleDir(sourceDir, destDir, double=True):
+def sliceSampleDir(sourceDir, destDir, double=True, maxSlices=False):
 	toSlice = getAudioInDir(sourceDir)
-	sliceSampleList(toSlice, destDir, double)
+	sliceSampleList(toSlice, destDir, double, maxSlices)
 	return
 
 
@@ -141,10 +147,14 @@ def analyzeBiteDir(directory, analysisFileName="sampledata.fft"):
 #--------------------------------------------------------------------------------------------------------
 # main function that unites it all. Processes a list of files into a folder with bites and analysis data
 
-def packList(listToSlice, destDir, double=True):
+def packList(listToSlice, destDir, double=True, maxSlices=False):
+	if (not maxSlices):
+		global maxBites
+		maxSlices = maxBites
+
 	if not exists(destDir):
 		makedirs(destDir)
-	sliceSampleList(listToSlice, destDir, double)
+	sliceSampleList(listToSlice, destDir, double, maxSlices)
 	analyzeBiteDir(destDir)
 	return
 
@@ -152,7 +162,10 @@ def packList(listToSlice, destDir, double=True):
 #--------------------------------------------------------------------------------------------------------
 # Wrapper for packList. Processes a folder of files into a folder with bites and analysis data
 
-def packFolder(sourceDir, destDir, double=True):
+def packFolder(sourceDir, destDir, double=True, maxSlices=False):
+	if (not maxSlices):
+		global maxBites
+		maxSlices = maxBites
 	fileList = getAudioInDir(sourceDir)
 	packList(fileList, destDir, double)
 	return
@@ -161,7 +174,10 @@ def packFolder(sourceDir, destDir, double=True):
 #--------------------------------------------------------------------------------------------------------
 # Wrapper for packList. Processes a single file into a folder with bites and analysis data
 
-def packFile(sourceFile, destDir, double=True):
+def packFile(sourceFile, destDir, double=True, maxSlices=False):
+	if (not maxSlices):
+		global maxBites
+		maxSlices = maxBites
 	fileList = [sourceFile]
 	packList(fileList, destDir, double)
 	return

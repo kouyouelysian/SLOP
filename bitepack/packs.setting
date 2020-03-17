@@ -5,16 +5,24 @@
             "sampleCount": 192
         },
         {
+            "path": "./bitepack/manuel",
+            "sampleCount": 118
+        },
+        {
             "path": "./bitepack/NES",
             "sampleCount": 192
         },
         {
             "path": "./bitepack/\u044164",
             "sampleCount": 192
+        },
+        {
+            "path": "./bitepack/rhythmheaven",
+            "sampleCount": 192
         }
     ],
     "packsActive": [
-        "contra",
+        "rhythmheaven",
         "NES",
         "\u044164"
     ]
