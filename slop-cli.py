@@ -402,8 +402,8 @@ while (1):
 			if (not exists(aboutLocation)):
 				badMessage = True
 				consoleBanner = "ERROR: files are corrupt or missing! Please redownload SLOP!"
+				continue
 			fHandle = open(aboutLocation, "r")
-			continue
 			displayString = fHandle.read()
 			fHandle.close()
 			print(displayString)
