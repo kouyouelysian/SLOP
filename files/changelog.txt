@@ -1,0 +1,5 @@
+--- SLOP: CHANGELOG ---
+
+2020 MAR 16: initial rollout of the thing. Basic functions, probably lots of bugs and failure points.
+
+2020 MAR 17: new features: per-chunk amplitude normalisation and chunk length randomisation. menu slightly remade. some bugs fixed.
